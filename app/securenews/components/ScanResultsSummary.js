@@ -1,0 +1,1 @@
+// ScanResultsSummary component
