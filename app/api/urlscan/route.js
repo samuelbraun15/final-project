@@ -1,11 +1,15 @@
-URLSCAN_API_KEY=import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
   const { url } = await request.json();
   const API_KEY = process.env.URLSCAN_API_KEY;
 
+  if (!API_KEY) {
+    return NextResponse.json({ error: 'API key is not set' }, { status: 500 });
+  }
+
   try {
-    const response = await fetch('https://urlscan.io/api/v1/scan/', {
+    const submitResponse = await fetch('https://urlscan.io/api/v1/scan/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -14,12 +18,12 @@ export async function POST(request) {
       body: JSON.stringify({ url: url }),
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to submit URL: ${response.status}`);
+    if (!submitResponse.ok) {
+      throw new Error(`Failed to submit URL: ${submitResponse.status}`);
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const { uuid } = await submitResponse.json();
+    return NextResponse.json({ uuid });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -30,19 +34,24 @@ export async function GET(request) {
   const uuid = searchParams.get('uuid');
   const API_KEY = process.env.URLSCAN_API_KEY;
 
+  if (!uuid) {
+    return NextResponse.json({ error: 'UUID is required' }, { status: 400 });
+  }
+
   try {
-    const response = await fetch(`https://urlscan.io/api/v1/result/${uuid}/`, {
+    const resultResponse = await fetch(`https://urlscan.io/api/v1/result/${uuid}/`, {
+      method: 'GET',
       headers: {
         'API-Key': API_KEY,
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch result: ${response.status}`);
+    if (!resultResponse.ok) {
+      throw new Error(`Failed to retrieve scan result: ${resultResponse.status}`);
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const result = await resultResponse.json();
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

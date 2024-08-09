@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function URLScanner() {
   const [url, setUrl] = useState('');
@@ -12,7 +12,6 @@ export default function URLScanner() {
     setError(null);
     setResult(null);
     try {
-      // Submit URL for scanning
       const submitResponse = await fetch('/api/urlscan', {
         method: 'POST',
         headers: {
@@ -20,15 +19,11 @@ export default function URLScanner() {
         },
         body: JSON.stringify({ url: url }),
       });
-
       if (!submitResponse.ok) {
         throw new Error(`Failed to submit URL: ${submitResponse.status}`);
       }
-
       const { uuid } = await submitResponse.json();
       console.log('Submitted URL, received UUID:', uuid);
-
-      // Poll for results
       let scanResult = null;
       for (let i = 0; i < 30; i++) {
         await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
@@ -39,16 +34,39 @@ export default function URLScanner() {
           break;
         }
       }
-
       if (!scanResult) {
         throw new Error('Failed to retrieve scan result after multiple attempts');
       }
-
       setResult(scanResult);
     } catch (error) {
       console.error('Error during URL submission and polling:', error);
       setError(error.message);
     }
+  };
+
+  const renderResult = (result) => {
+    const { page, stats, verdicts } = result;
+    return (
+      <div className="mt-4">
+        <h2 className="text-2xl font-semibold">Scan Result</h2>
+        <div className="bg-gray-100 p-4 rounded">
+          <p><strong>Page Title:</strong> {page.title}</p>
+          <p><strong>Final URL:</strong> {page.url}</p>
+          <p><strong>IP Address:</strong> {page.ip}</p>
+          <p><strong>Domain:</strong> {page.domain}</p>
+          <p><strong>Country:</strong> {page.country}</p>
+          <p><strong>Scan Date:</strong> {page.date}</p>
+          <p><strong>Malicious:</strong> {verdicts.overall.malicious ? 'Yes' : 'No'}</p>
+          <p><strong>Categories:</strong> {verdicts.overall.categories.join(', ')}</p>
+          <p><strong>Stats:</strong></p>
+          <ul>
+            <li><strong>Data Length:</strong> {stats.dataLength}</li>
+            <li><strong>Encoded Data Length:</strong> {stats.encodedDataLength}</li>
+            <li><strong>Requests:</strong> {stats.requests}</li>
+          </ul>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -67,12 +85,7 @@ export default function URLScanner() {
         <button type="submit" className="bg-blue-500 text-white p-2 rounded">Scan URL</button>
       </form>
       {error && <p className="text-red-500">{error}</p>}
-      {result && (
-        <div className="mt-4">
-          <h2 className="text-2xl font-semibold">Scan Result</h2>
-          <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(result, null, 2)}</pre>
-        </div>
-      )}
+      {result && renderResult(result)}
     </div>
   );
 }
