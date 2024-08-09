@@ -49,7 +49,7 @@ export default function URLScanner() {
     return (
       <div className="mt-4">
         <h2 className="text-2xl font-semibold">Scan Result</h2>
-        <div className="bg-gray-100 p-4 rounded">
+        <div className="bg-gray-100 p-4 rounded shadow-md">
           <p><strong>Page Title:</strong> {page.title}</p>
           <p><strong>Final URL:</strong> {page.url}</p>
           <p><strong>IP Address:</strong> {page.ip}</p>
@@ -59,7 +59,7 @@ export default function URLScanner() {
           <p><strong>Malicious:</strong> {verdicts.overall.malicious ? 'Yes' : 'No'}</p>
           <p><strong>Categories:</strong> {verdicts.overall.categories.join(', ')}</p>
           <p><strong>Stats:</strong></p>
-          <ul>
+          <ul className="list-disc list-inside">
             <li><strong>Data Length:</strong> {stats.dataLength}</li>
             <li><strong>Encoded Data Length:</strong> {stats.encodedDataLength}</li>
             <li><strong>Requests:</strong> {stats.requests}</li>
@@ -71,20 +71,20 @@ export default function URLScanner() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">URL Scanner</h1>
-      <p className="mb-4">Enter a URL to scan for security issues.</p>
-      <form onSubmit={handleSubmit} className="mb-4">
+      <h1 className="text-3xl font-bold mb-4 text-center">URL Scanner</h1>
+      <p className="mb-4 text-center">Enter a URL to scan for security issues.</p>
+      <form onSubmit={handleSubmit} className="mb-4 bg-white p-6 rounded shadow-md">
         <input
           type="url"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Enter URL"
-          className="border p-2 rounded w-full mb-2"
+          className="border p-2 rounded w-full mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">Scan URL</button>
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full hover:bg-blue-600 transition duration-200">Scan URL</button>
       </form>
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500 text-center">{error}</p>}
       {result && renderResult(result)}
     </div>
   );

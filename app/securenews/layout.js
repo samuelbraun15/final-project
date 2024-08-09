@@ -1,1 +1,0 @@
-// SecureNews layout
